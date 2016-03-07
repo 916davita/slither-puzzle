@@ -15,6 +15,7 @@ function begin(size){
 var Cell = function(x,y){
 	this.xCoordinate = x;
 	this.yCoordinate = y;
+	this.type; // edge for deactivated
 	this.playable = true;
 	this.value;
 };
@@ -42,13 +43,11 @@ function deactivateEdges(){
 
 			if (test.xCoordinate === 0 || test.xCoordinate === (width - 1)){
 				test.playable = false;
-				var item = [test.xCoordinate , test.yCoordinate];
-				results.push(item);
+				results.push([test.xCoordinate , test.yCoordinate]);
 
 			} else if(test.yCoordinate === 0 || test.yCoordinate === (height - 1)){
 				test.playable = false;
-				var item = [test.xCoordinate , test.yCoordinate];
-				results.push(item);
+				results.push([test.xCoordinate , test.yCoordinate]);
 			};
 		};
 	};
@@ -85,14 +84,25 @@ function displayGrid (width, height, cellSize){
 	turnGrey();
 };
 
+function pathValues(){              //just for display
+	for(i=0;i<path.length;i++){
+		path[i].value = i + 1;
+		x = path[i].xCoordinate;
+		y = path[i].yCoordinate;
+		$('.cell' + x + "-" + y).empty();
+		$('.cell' + x + "-" + y).append(path[i].value);
+	};
+};
+
 function turnPurple(x,y){
-	$(".cell"+ x + "-" + y).css("background-color", "#8C60BD");
+	$(".cell"+ x + "-" + y).css("background-color", "#8C60BD");  //temp for learning.
 };
 function undoPurple(x,y){
-	$(".cell"+ x + "-" + y).css("background-color", "#C8F4D0");
+	$(".cell"+ x + "-" + y).css("background-color", "#C8F4D0");  //temp for learning.
 };
 
 function clearGrid(){
+	deactivateEdges();
 	for(i=1;i<(cell.length-1);i++){
 		for(j=1;j<(cell[i].length-1);j++){
 
@@ -107,61 +117,67 @@ function clearGrid(){
 	return cell;
 };
 
+var allPaths;
 var path;
 
-function makePath(x,y){
-	clearGrid();
-	path = [];
+function findAllPaths(x,y){ //arg- start cell
 
-	nextCell(x,y);
-	pathValues();
-	return path;
+	allPaths = [];
+
+	if (cell[x][y] !== undefined && cell[x][y].playable){  //if start is playable
+		
+		findPath(x,y);
+		pathValues();  //for display
+
+		return allPaths;
+
+	} else return null;
 };
 
-function nextCell(startX, startY){
-		var start = cell[startX][startY];
-		path.push(start);
+function findPath(x,y){
+	path = [];
+	clearGrid();
+	nextCell(x,y);
 
-		start.playable = false;
-		turnPurple(startX,startY);
+	if(path.length === activeCells) allPaths.push(path);
+}
 
-		var adjacentCells = [
-			cell[startX][startY +1],    // N
-			cell[startX +1][startY +1], // NE
-			cell[startX +1][startY],    // E
-			cell[startX +1][startY -1], // SE
-			cell[startX][startY -1],    // S
-			cell[startX -1][startY -1], // SW
-			cell[startX -1][startY],    // W
-			cell[startX -1][startY +1]  // NW
-			];
-		
-		for(i=0;i<adjacentCells.length;i++){
-			var test = adjacentCells[i];
+function nextCell(x, y){
 
-			if (test.playable === true){
-				console.log(path);
-				nextCell(test.xCoordinate, test.yCoordinate);
-			};
+	var start = cell[x][y];
+	
+	path.push(start);
+	start.playable = false;
+
+	turnPurple(x,y);
+
+	var adjacentCells = [
+		cell[x][y +1],    // N
+		cell[x +1][y +1], // NE
+		cell[x +1][y],    // E
+		cell[x +1][y -1], // SE
+		cell[x][y -1],    // S
+		cell[x -1][y -1], // SW
+		cell[x -1][y],    // W
+		cell[x -1][y +1]  // NW
+		];
+
+	for(i=0;i<adjacentCells.length;i++){  //goes through every adj until one is playable
+
+		var test = adjacentCells[i];
+
+		if (test.playable === true){          //when one is playable, it starts again at that spot
+
+			return nextCell(test.xCoordinate, test.yCoordinate);
+
+		                            //if test space is not playable, it continues clockwise	
+		} else {
+			continue
 		};
 	};
 
-function pathValues(){
-	for(i=0;i<path.length;i++){
-		path[i].value = i + 1;
-		x = path[i].xCoordinate;
-		y = path[i].yCoordinate;
-		$('.cell' + x + "-" + y).empty();
-		$('.cell' + x + "-" + y).append(path[i].value);
-	};
+	//if function gets to this point, then none of the adjacent spaces were playable
+	
+		//next, needs to start again one step back, all adj positions offset by one
+	start = path[path.length - 2];
 };
-
-
-
-
-
-
-
-
-
-
