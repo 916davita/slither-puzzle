@@ -123,6 +123,7 @@ var path;
 function findAllPaths(x,y){ //arg- start cell
 
 	allPaths = [];
+	clearGrid();
 
 	if (cell[x][y] !== undefined && cell[x][y].playable){  //if start is playable
 		
@@ -135,23 +136,16 @@ function findAllPaths(x,y){ //arg- start cell
 };
 
 function findPath(x,y){
+
 	path = [];
 	clearGrid();
 	nextCell(x,y);
-
-	if(path.length === activeCells) allPaths.push(path);
-}
+};
 
 function nextCell(x, y){
-
 	var start = cell[x][y];
-	
-	path.push(start);
-	start.playable = false;
 
-	turnPurple(x,y);
-
-	var adjacentCells = [
+	var	adjacentCells = [
 		cell[x][y +1],    // N
 		cell[x +1][y +1], // NE
 		cell[x +1][y],    // E
@@ -161,23 +155,51 @@ function nextCell(x, y){
 		cell[x -1][y],    // W
 		cell[x -1][y +1]  // NW
 		];
-
+	
 	for(i=0;i<adjacentCells.length;i++){  //goes through every adj until one is playable
 
 		var test = adjacentCells[i];
-
 		if (test.playable === true){          //when one is playable, it starts again at that spot
 
-			return nextCell(test.xCoordinate, test.yCoordinate);
+			path.push(start);
+			start.playable = false;
+			turnPurple(x,y);                  //just for display
 
-		                            //if test space is not playable, it continues clockwise	
+			return nextCell(test.xCoordinate, test.yCoordinate);	
 		} else {
-			continue
+			continue     //if test space is not playable, it continues clockwise
 		};
 	};
 
-	//if function gets to this point, then none of the adjacent spaces were playable
-	
-		//next, needs to start again one step back, all adj positions offset by one
-	start = path[path.length - 2];
+    //if function gets to this point, then none of the adjacent spaces were playable
+
+
+	if (path.length === activeCells-1){
+		path.push(start);
+		start.playable = false;
+		turnPurple(x,y);   //display
+
+		allPaths.push(path);
+
+	} else {  // trying to go back to the last space and try a different adj cell
+
+		console.log("You got stuck at " + start.xCoordinate + "," + start.yCoordinate);
+
+		start = path[path.length - 1];
+
+		console.log("Let's go back to " + start.xCoordinate + "," + start.yCoordinate);
+
+		adjacentCells.push(adjacentCells.shift());
+
+		console.log(adjacentCells);
+		console.log(start.xCoordinate, start.yCoordinate);
+
+//		nextCell(start.xCoordinate, start.yCoordinate);
+		 
+	}
 };
+
+
+
+
+
