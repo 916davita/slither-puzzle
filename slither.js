@@ -1,20 +1,11 @@
-//for testing purposes:
-function getFunky(x,y,size){
-    var funk = findAllPaths(x,y,size);
-    display(funk[0], size+2);
-    for(i=0;i<funk[0].length;i++){
-        console.log("(" + funk[0][i].xCoordinate + "," + funk[0][i].yCoordinate + ") value: " + funk[0][i].value);
-    }
-};
-
 function findAllPaths(x,y, size){
     function Cell(x,y){
         this.xCoordinate = x;
         this.yCoordinate = y;
         this.valid = true;
-        this.value,
+        this.value;
         this.testShift = 0;
-    };
+    }
     function buildGrid(size){
         size = size + 2 // edge cells
         var grid = [];
@@ -31,7 +22,7 @@ function findAllPaths(x,y, size){
             grid[i][grid.length -1].valid = false;
         };
         return grid;
-    };
+    }
     function findAdjacent(current){
         var x = current.xCoordinate;
         var y = current.yCoordinate;
@@ -46,65 +37,71 @@ function findAllPaths(x,y, size){
             grid[x -1][y +1]  // NW
             ];
         return adjacentCells
-    };
+    }
     function clonePath(path){
         var newArray = [];
         for(i=0;i<path.length;i++){
             var x = path[i].xCoordinate;
             var y = path[i].yCoordinate;
             var clone = new Cell(x,y);
-            clone.value = i + 1;
+            clone.value = i;
             clone.valid = false;
             clone.testShift = path[i].testShift;
             newArray.push(clone);
         } return newArray;
-    };
+    }
     var allPaths = [];
     var currentPath = [];
+    
+    function makePath(currentCell){
+        do{currentCell = takeStep(currentCell);
+        console.log(currentCell.xCoordinate + "," + currentCell.yCoordinate);
+        }while(currentPath.length !== size*size -1); //will stop looping when currentPath is full length
+        currentPath.push(currentCell);
+        allPaths.push(clonePath(currentPath));
+    }
     function takeStep(currentCell){
         currentCell.valid = false;
-        if(currentPath.length === (size*size)-1){
-            currentPath.push(currentCell);
-            allPaths.push(clonePath(currentPath));
-            console.log("full length");
-            return
-        }else{
-            var testArray = findAdjacent(currentCell);
-            for(i=currentCell.testShift;i<testArray.length;i++){
-
-                if(testArray[i].valid === true){
-                    currentCell.testShift = i+1;
-                    currentPath.push(currentCell); //must be after testShift is altered
-                    takeStep(testArray[i]);
-                    return
-                }
+        var testArray = findAdjacent(currentCell);
+        for(i=currentCell.testShift;i<(8 - currentCell.testShift);i++){
+            if(testArray[i].valid){
+                currentCell.testShift = i+1;
+                currentPath.push(currentCell); //must be after testShift is altered
+                return testArray[i];
             }
         }
-        currentCell.testShift = 0;
+        // at this point, no adj were hits
         currentCell.valid = true;
-        takeStep(currentPath.pop());
+        currentCell.testShift = 0;
+        return takeStep(currentPath.pop()); //recur until a single hit is found
     }
     var grid = buildGrid(size);
-    takeStep(grid[x][y]);
+    makePath(grid[x][y]);
+
+    console.log(currentPath);
     return allPaths;
 }
-/* display(findAllPaths(x,y,size)[0], gridSize)*/
-
-function display(path,gridSize){
-    $(".puzzle").empty();
-    $(".puzzle").css("width", gridSize*40); //temp
+function display(path,gridSize, puzzleId){
+    $(".puzzle-container").append("<div class='puzzle puzzle" + puzzleId + "'></div>");
+    $(".puzzle" + puzzleId).css("width", gridSize*40); //temp
 
     for(y=0; y<gridSize; y++){
-        $(".puzzle").prepend("<div class='row row" + y + "'></div>");
+        $(".puzzle" + puzzleId).prepend("<div class='puzzle" + puzzleId +"_row" + y + "'></div>");
         for(x=0;x<gridSize;x++){
-            $(".row" + y).append("<div class='cell column" + x + " cell" + x + "-" + y + "'></div>");
-        };
-    };
+            $(".puzzle" + puzzleId + "_row" + y).append("<div class='cell puzzle" + puzzleId + "_column" + x + " puzzle" + puzzleId + "_cell" + x + "-" + y + "'></div>");
+        }
+    }
     for(i=0;i<path.length;i++){
         x = path[i].xCoordinate;
         y = path[i].yCoordinate;
-        $('.cell' + x + "-" + y).empty();
-        $('.cell' + x + "-" + y).append(path[i].value);
+        $(".puzzle" + puzzleId + "_cell" + x + "-" + y).append(path[i].value);
     }
-    $(".column0, .column" + (gridSize-1) + ", .row0 * , .row" + (gridSize-1) + " *" ).css("background-color", "#7F7E8C");
+    $(".puzzle" + puzzleId + "_column0, .puzzle" + puzzleId + "_column" + (gridSize-1) + ", .puzzle" + puzzleId + "_row0 * , .puzzle" + puzzleId + "_row" + (gridSize-1) + " *" ).css("background-color", "#7F7E8C");
 }
+function displayAllPaths(x,y,size){
+    var allPaths= findAllPaths(x,y,size);
+    for(i=0;i<allPaths.length;i++){
+        display(allPaths[i], size +2, i)
+    }
+}
+
