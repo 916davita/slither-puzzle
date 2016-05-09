@@ -13,7 +13,6 @@
 
 var example1 = "15253545551424344454132333435312223242521121314151";
 
-
 function main(slimData){
 	function setup(){
 		function unpack(slimData){
@@ -231,21 +230,6 @@ function main(slimData){
 	for(i=0;i<7;i++){
 		results.push(g[i][0].value);
 	}
-
-	function finalValue(list){
-		//console.log(list);
-		var index = Math.floor(Math.random() * 25);
-		if(index === 12){ //center cell, nothing changes
-			results.push(g[3][3].value);
-		}else{
-			console.log(list[index]);
-		}
-	}
-	finalValue(cellList(g));
-
-	//final two digits in results represent value of centermost cell
-	//coming back, make it possible to have a center in any location displayed
-
 	return g;
 }
 
