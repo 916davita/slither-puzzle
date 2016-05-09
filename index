@@ -3,24 +3,33 @@
 	<meta charset="utf-8">
 	<title>Slither Numbers</title>
 	<script type="text/javascript" src="jquery.js"></script>
-	<script type="text/javascript" src="find_all_paths.js"></script>
+	<script type="text/javascript" src="make_puzzle.js"></script>
 	<style>
 		*{
 			box-sizing: border-box;
+			font-family:avenir,sans-serif;
 		}
 		.cell{
-
-			background-color: #C8F4D0;
-			border:2px solid #3AAE36;
+			background-color: #B6FFFD;
+			border:2px solid #A1E3E1;
 			font-size:15px;
 			padding:5px;
 			float:left;
 			display: inline;
+			width:40px;
+			height:40px;
+		}
+		.solution{
+			display:inline-block;
 		}
 	</style>
 </head>
 <body>
-	<div class="puzzle">
+	Type 'displayPuzzle(example1) in the console.'
+	<div class="puzzle-container">
+		
+	</div>
+	<div class="solution-container">
 	</div>
 </body>
 </html>
