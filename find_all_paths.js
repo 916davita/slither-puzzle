@@ -38,26 +38,32 @@ function findAllPaths(x,y, size){
             ];
         return adjacentCells
     }
-    function clonePath(path){
-        var newArray = [];
-        for(i=0;i<path.length;i++){
-            var x = path[i].xCoordinate;
-            var y = path[i].yCoordinate;
-            var clone = new Cell(x,y);
-            clone.value = i;
-            clone.valid = false;
-            clone.testShift = path[i].testShift;
-            newArray.push(clone);
-        } return newArray;
+    function reset(targetCell){
+        targetCell.valid = true;
+        targetCell.testShift = 0;
+    }
+    function slimData(path){
+        var pathString = '';
+        for(i=0;i<path.length;i++){ //x and y each always one digit
+            pathString += path[i].xCoordinate;
+            pathString += path[i].yCoordinate;
+        }
+        return pathString;
     }
     function makePath(currentCell, size){
         do{ var currentCell = takeStep(currentCell);
         } while(currentPath.length !== (size*size) -1);
+
         if(currentPath[currentPath.length-1].xCoordinate === -1){ //for testing
             return null;
         }
         currentPath.push(currentCell);
-        allPaths.push(clonePath(currentPath));
+        var slim = slimData(currentPath);
+        solutions.push({
+            "coordinates" : slim,
+            "solution_id" : solution_id});
+
+        solution_id++
     }
     function takeStep(currentCell){
         if(currentCell !== undefined){ //for testing
@@ -77,15 +83,13 @@ function findAllPaths(x,y, size){
             return
         }
     }
-    function reset(targetCell){
-        targetCell.valid = true;
-        targetCell.testShift = 0;
-    }
-    var grid, currentPath, allPaths;
-    allPaths = [];
+    var grid, currentPath, solutions, solution_id;
+    solution_id = 1;
+    solutions = [];
     currentPath = [];
     grid = buildGrid(size);
     makePath(grid[x][y], size);
+
     var currentCell;
     function removeCells(num){ //num is optional
         for(var l=0;l<num;l++){ //for every cell to be removed
@@ -93,40 +97,20 @@ function findAllPaths(x,y, size){
             reset(currentCell);
         }
         currentPath.splice(-num, num);
+
         currentCell = currentPath[currentPath.length-1]; //setup for next start
         currentCell.valid = true;
         currentCell = currentPath.pop();
     }
-    for(n=1;n<50000;n++){  //start at 1 because one is already complete
+
+    for(n=1;n<100000000;n++){  //start at 1 because one is already complete
         removeCells();
         if(makePath(currentCell, size) === null){ //for testing
             break
         }
     }
-    return allPaths; 
+    return solutions; 
 }
-function displayAllPaths(x,y,size){
-    function display(path, gridSize, puzzleId){
-        $(".puzzle-container").append("<div class='puzzle puzzle" + puzzleId + "'></div>");
-        $(".puzzle" + puzzleId).css("width", gridSize*40); //temp
-
-        for(y=0; y<gridSize; y++){
-            $(".puzzle" + puzzleId).prepend("<div class='puzzle" + puzzleId +"_row" + y + "'></div>");
-            for(x=0;x<gridSize;x++){
-                $(".puzzle" + puzzleId + "_row" + y).append("<div class='cell puzzle" + puzzleId + "_column" + x + " puzzle" + puzzleId + "_cell" + x + "-" + y + "'></div>");
-            }
-        }
-        for(i=0;i<path.length;i++){
-            x = path[i].xCoordinate;
-            y = path[i].yCoordinate;
-            $(".puzzle" + puzzleId + "_cell" + x + "-" + y).append(path[i].value);
-        }
-        $(".puzzle" + puzzleId + "_column0, .puzzle" + puzzleId + "_column" + (gridSize-1) + ", .puzzle" + puzzleId + "_row0 * , .puzzle" + puzzleId + "_row" + (gridSize-1) + " *" ).css("background-color", "#7F7E8C");
-    }
-    var allPaths= findAllPaths(x,y,size);
-    for(var h=0;h<allPaths.length;h++){
-        display(allPaths[h], size +2, h)
-    }
-    return allPaths //MAY REMOVE LATER
-}
+var solutions = findAllPaths(1,1,5);
+console.log(solutions);
 
