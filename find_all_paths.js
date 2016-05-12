@@ -1,3 +1,19 @@
+function mongoIfy(solution_JSONs){
+    // retrieve
+    var MongoClient = require('mongodb').MongoClient;
+    // Connect to the db
+    MongoClient.connect("mongodb://localhost:27017/slither_puzzle", function(err, db) {
+      if(err) { return console.dir(err); }
+      if(!err) {
+        console.log("We are connected");
+
+        var collection = db.collection('solutions');
+
+        collection.insert(solution_JSONs)
+      }
+    });
+}
+
 function findAllPaths(x,y, size){
     function Cell(x,y){
         this.xCoordinate = x;
@@ -103,7 +119,7 @@ function findAllPaths(x,y, size){
         currentCell = currentPath.pop();
     }
 
-    for(n=1;n<100000000;n++){  //start at 1 because one is already complete
+    for(n=1;n<60000000;n++){  //start at 1 because one is already complete
         removeCells();
         if(makePath(currentCell, size) === null){ //for testing
             break
@@ -112,5 +128,5 @@ function findAllPaths(x,y, size){
     return solutions; 
 }
 var solutions = findAllPaths(1,1,5);
-console.log(solutions);
+mongoIfy(solutions);
 
